@@ -1,15 +1,14 @@
 # Modernization Existing Integration Stack
 
-# Install  Cloud Pack for Integration 2020.2
+# Install Cloud Pack for Integration 2020.2 On IBM Cloud
 
-Documentation available here : https://www.ibm.com/support/knowledgecenter/en/SSGT7J_20.2/welcome.html
+Knowledge Center Documentation available here : https://www.ibm.com/support/knowledgecenter/en/SSGT7J_20.2/welcome.html
 
 ## Prepare
 
 - Create a OCP cluster: mini 5x 16cpu-32G
 - Add IBM Common Services operators and IBM Cloud pack operators for online catalog
 https://www.ibm.com/support/knowledgecenter/SSGT7J_20.2/install/install_online_catalog_sources.html
-
 
 
 ## Install IBM Common Services
