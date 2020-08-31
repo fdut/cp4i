@@ -79,35 +79,36 @@ The operator creates a namespace **ibm-common-services** with
 
 - From the Project drop-down list, select the **ibm-common-services namespace**. You see the **Operand Deployment Lifecycle Manager Operator**.
 
-- Click the **OperandConfig** and then select the existing common-services OperandConfig. S
+- Click the **OperandConfig** and then select the existing common-services OperandConfig instance.
 
 - Select the YAML Tab.
 
 Add the following parameters to the ibm-iam-operator.spec.authentication.config section.
 
 ```
-  authentication:
+authentication:
   replicas: 3
   config:
     roksEnabled: true
-    roksURL: 'https://<openshift_server_endpoint'
+    roksURL: 'https://<openshift_server_endpoint>'
     roksUserPrefix: 'IAM#'
-
 ```
 
 For example :
+(Retrieve roks url from OpenShift Copy Login Command Menu )
 
 ```
  authentication: 
-          replicas: 3
-          config:
-            roksEnabled: true
-            roksURL: 'https://c101-e.eu-de.containers.cloud.ibm.com:32207'
-            roksUserPrefix: 'IAM#'
-        securityonboarding: {}
+   replicas: 3
+   config:
+     roksEnabled: true
+     roksURL: 'https://c101-e.eu-de.containers.cloud.ibm.com:32207'
+     roksUserPrefix: 'IAM#'
+ securityonboarding: {}
 ```
-- ** Save **
-- Select the **OperandRequest** tab and click Create Operand Request. Paste the following content in the YAML editor (overwrite the existing content):
+- **Save**
+- Select the **OperandRequest** tab and click **Create Operand Request**. 
+- Paste the following content in the YAML editor (overwrite the existing content):
 
 ```
 apiVersion: operator.ibm.com/v1alpha1
@@ -133,6 +134,7 @@ spec:
         - name: ibm-licensing-operator
         - name: ibm-metering-operator
         - name: ibm-commonui-operator
+        - name: ibm-elastic-stack-operator
         - name: ibm-ingress-nginx-operator
         - name: ibm-auditlogging-operator
         - name: ibm-platform-api-operator
@@ -359,6 +361,7 @@ Operators:
 - Operational dashboard:  *IBM Cloud Pak for Integration Operations Dashboard*
 - Datapower: *IBM DataPower Gateway*
 - API Connect: *IBM API Connect*
+- Event Stream: *IBM Event Stream*
 - MQ: *IBM MQ*.
 - Aspera: *IBM Aspera HSTS*
 
@@ -386,6 +389,43 @@ The provided APIs are
 You might for example been able to call when integration servers are deployed
 ```
 oc get integrationserver
+```
+
+Troubleshooting
+---
+
+If issue below :
+```
+Failed to pull image "registry.connect.redhat.com/ibm/couchdb-operator@sha256:db0902bcf4a3273967b2b4c3fa92fdf14c8a099ca269ef1adff9c46099d5e15d": rpc error: code = Unknown desc = unable to retrieve auth token: invalid username/password: unauthorized: Please login to the Red Hat Registry using your Customer Portal credentials. Further instructions can be found here: https://access.redhat.com/RegistryAuthentication
+```
+Test connection to redhat resigtry
+
+```
+docker login registry.connect.redhat.com
+Username: frederic_dutheil-fr
+Password:
+WARNING! Your password will be stored unencrypted in /Users/fred/.docker/config.json.
+Configure a credential helper to remove this warning. See
+https://docs.docker.com/engine/reference/commandline/login/#credentials-store
+
+Login Succeeded
+```
+Create a secret in openshift-operator namespace
+```
+oc -n openshift-operator create secret docker-registry redhat-pull-secret --docker-server=registry.connect.redhat.com --docker-username="frederic_dutheil-fr" --docker-password="dughor-duzwuh-Weqsu7" --docker-email=frederic_dutheil@fr.ibm.com
+```
+
+Update couchdb-operator Deployment to add imagePullSecrets
+
+```
+spec:
+  containers:
+    - name: couchdb-operator
+      image: registry.connect.redhat.com/ibm/couchdb-operator@sha256:db0902bcf4a3273967b2b4c3fa92fdf14c8a099ca269ef1adff9c46099d5e15d
+...
+  imagePullSecrets:
+    - name: redhat-pull-secret
+EOF
 ```
 
 ### MQ Operator
@@ -618,6 +658,10 @@ acedb   11.0.0.9-r2       1          false          Pending             17s
 ```
 
 The creation might take some time as a storage need to be created.
+
+> Note: if you select **all** for parameter **Connectors to use** To allow access to the cloud-managed connectors, the following parameters must be set also: spec.appConnectURL, spec.ibmCloudAPIKey, and spec.appConnectInstanceID. 
+
+>If your App Connect on IBM Cloud instance is in US-South then spec.appConnectURL is "https://firefly-api-prod.appconnect.ibmcloud.com". If it is in London then it is "https://firefly-api-produk.eu-gb.appconnect.ibm.com"
 
 ## ACE Designer
 
