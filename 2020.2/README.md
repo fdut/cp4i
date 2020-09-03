@@ -534,10 +534,67 @@ operand-deployment-lifecycle-manager-5dcbdfccdb-kdn4p   1/1     Running   0     
 For each instance you will need to create a secret for the IBM entitlement key.
 Please ref. to the entitlement key section.
 
+
+## Asset Repository
+
+- namespace where to install (`oc new-project asset-repository`)
+- A secret that hold a valid entitlement key (refer to the ibm entitlement key section) to get the images
+  you might copy the key from another ns like for example:
+  ```
+  oc get secret ibm-entitlement-key -n cp4i -o yaml | sed 's/cp4i/asset-repository/g' | oc create -n asset-repository -f -
+  ```
+
+
+
+- In Cloud Pack Platform Navigator choose capability **Asset Repository**
+
+- For this installation we choose *Development* option
+- In Operator Part (Development)
+  *Replace with your own value*
+  - name : **assetrepo**
+  - namespace : **asset-repository**
+  - License : **on**
+  - Asset data storage class : **ibmc-file-gold-gid** (file)
+  - Asset metadata storage class : **ibmc-block-gold** (block)
+
+  Change volume size if you want in advanced mode.
+
+
+## Operations Dashboard Instance
+
+- IBM CS is installed (All namespace scoped)
+- IBM Cloud Pak for Integration Operations Dashboard operator installed ( cluster scope )
+
+- A namespace to hold the Operational Dashboard
+
+`oc new-project od --description="Operation Dashboard" --display-name="Operation Dashboard"`
+
+- A secret that hold a valid entitlement key (refer to the ibm entitlement key section) to get the images
+  
+  you might copy the key from another ns like for example:
+  ```
+  oc get secret ibm-entitlement-key -n cp4i -o yaml | sed 's/cp4i/od/g' | oc create -n od -f -
+  ```
+
+- In CloudPack Platform Navigator > **Create Capability**
+- Click **Operation Dashboard**
+- Select the option available 
+
+
+- name : **od1**
+- namespace : **od**
+- Config DB storage class name : (IBM Cloud) **ibmc-block-bronze**
+- Change or not stockage value
+- Store storage class name : (IBM Cloud)  **ibmc-block-gold**
+- Change or not stockage value
+
+
+
+
 ## APIC Instance
 
 - namespace where to install (`oc new-project apic`)
-- A secret that hold a valid entitlement key (refer to the ibm entitlement key section) to get the images
+- A secret that hold a valid entitlement key** (refer to the ibm entitlement key section) to get the images
   you might copy the key from another ns like for example:
   ```
   oc get secret ibm-entitlement-key -n cp4i -o yaml | sed 's/cp4i/apic/g' | oc create -n apic -f -
@@ -659,9 +716,6 @@ acedb   11.0.0.9-r2       1          false          Pending             17s
 
 The creation might take some time as a storage need to be created.
 
-> Note: if you select **all** for parameter **Connectors to use** To allow access to the cloud-managed connectors, the following parameters must be set also: spec.appConnectURL, spec.ibmCloudAPIKey, and spec.appConnectInstanceID. 
-
->If your App Connect on IBM Cloud instance is in US-South then spec.appConnectURL is "https://firefly-api-prod.appconnect.ibmcloud.com". If it is in London then it is "https://firefly-api-produk.eu-gb.appconnect.ibm.com"
 
 ## ACE Designer
 
@@ -680,10 +734,15 @@ The creation might take some time as a storage need to be created.
 - Configuration
 	- Name: acedesigner
 	- Namespace: ace
-	- Connector: local
+	- Connector: local *(or all -> see note below )*
 	- Storage: **ibmc-file-gold-gid**
 	- Accept the license and leave the default for the license
 	- For the storage class provide: **ibmc-file-gold-gid** and storage type to persistent-claim
+
+> Note: if you select **all** for parameter **Connectors to use** To allow access to the cloud-managed connectors, the following parameters must be set also: spec.appConnectURL, spec.ibmCloudAPIKey, and spec.appConnectInstanceID. 
+
+>If your App Connect on IBM Cloud instance is in US-South then spec.appConnectURL is "https://firefly-api-prod.appconnect.ibmcloud.com". If it is in London then it is "https://firefly-api-produk.eu-gb.appconnect.ibm.com"
+
 
 
 ## MQ Instance
@@ -723,35 +782,6 @@ In PN console
 - Type profile : Dev
 - Name : es-dev
 - Namespace : evenstream
-
-
-## Operations Dashboard Instance
-
-- IBM CS is installed (All namespace scoped)
-- IBM Cloud Pak for Integration Operations Dashboard operator installed ( cluster scope )
-
-- A namespace to hold the Operational Dashboard
-
-`oc new-project od --description="Operation Dashboard" --display-name="Operation Dashboard"`
-
-- A secret that hold a valid entitlement key (refer to the ibm entitlement key section) to get the images
-  
-  you might copy the key from another ns like for example:
-  ```
-  oc get secret ibm-entitlement-key -n cp4i -o yaml | sed 's/cp4i/od/g' | oc create -n od -f -
-  ```
-
-- In CloudPack Platform Navigator > **Create Capability**
-- Click **Operation Dashboard**
-- Select the option available 
-
-
-- name : **od1**
-- namespace : **od**
-- Config DB storage class name : (IBM Cloud) **ibmc-block-bronze**
-- Change or not stockage value
-- Store storage class name : (IBM Cloud)  **ibmc-block-gold**
-- Change or not stockage value
 
 
 
