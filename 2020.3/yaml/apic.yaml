@@ -1,0 +1,27 @@
+apiVersion: apiconnect.ibm.com/v1beta1
+kind: APIConnectCluster
+metadata:
+  labels:
+    app.kubernetes.io/instance: apiconnect
+    app.kubernetes.io/managed-by: ibm-apiconnect
+    app.kubernetes.io/name: apiconnect-minimum
+  name: apic
+  namespace: apic
+spec:
+  license:
+    accept: true
+    use: nonproduction
+  profile: n3xc4.m16
+  version: 10.0.1.0-627
+  gateway:
+    adminUser:
+      secretName: datapower-admin-credentials
+    openTracing:
+      enabled: true
+      odTracingNamespace: od-dev
+  management:
+    billing:
+      enabled: true
+    testAndMonitor:
+      enabled: true
+  storageClassName: ibmc-block-gold

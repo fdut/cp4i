@@ -1,0 +1,26 @@
+apiVersion: appconnect.ibm.com/v1beta1
+kind: DesignerAuthoring
+metadata:
+  name: dsg-dev
+  namespace: dsg-dev
+spec:
+  couchdb:
+    storage:
+      class: ibmc-block-gold
+      size: 20Gi
+      type: persistent-claim
+  designerFlowsOperationMode: local
+  license:
+    accept: true
+    license: L-APEH-BPUCJK
+    use: CloudPakForIntegrationNonProduction
+  useCommonServices: true
+  version: 11.0.0
+  replicas: 1
+  integrationServer:
+    containers:
+      runtime:
+        livenessProbe:
+          initialDelaySeconds: 60
+        readinessProbe:
+          initialDelaySeconds: 60

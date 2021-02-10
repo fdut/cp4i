@@ -1,0 +1,28 @@
+apiVersion: mq.ibm.com/v1beta1
+kind: QueueManager
+metadata:
+  name: qm-dev
+  namespace: mq-dev
+spec:
+  license:
+    accept: true
+    license: L-RJON-BQPGWD
+    use: NonProduction
+  queueManager:
+    name: QUICKSTART
+    storage:
+      queueManager:
+        type: ephemeral
+  template:
+    pod:
+      containers:
+        - env:
+            - name: MQSNOAUT
+              value: 'yes'
+          name: qmgr
+  version: 9.2.0.0-r2
+  web:
+    enabled: true
+  tracing:
+    enabled: true
+    namespace: od-dev

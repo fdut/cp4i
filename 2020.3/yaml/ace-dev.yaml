@@ -1,0 +1,28 @@
+apiVersion: appconnect.ibm.com/v1beta1
+kind: Dashboard
+metadata:
+  name: ace-dev
+  namespace: ace-dev
+spec:
+  license:
+    accept: true
+    license: L-APEH-BPUCJK
+    use: CloudPakForIntegrationNonProduction
+  pod:
+    containers:
+      content-server:
+        resources:
+          limits:
+            cpu: 250m
+      control-ui:
+        resources:
+          limits:
+            cpu: 250m
+            memory: 250Mi
+  replicas: 1
+  storage:
+    class: ibmc-file-gold-gid
+    size: 10Gi
+    type: persistent-claim
+  useCommonServices: true
+  version: 11.0.0

@@ -1,0 +1,11 @@
+spec:
+  template:
+    spec:
+      containers:
+        - resources:
+          readinessProbe:
+            initialDelaySeconds: 60
+          name: dsg-dev-ui
+          livenessProbe:
+            initialDelaySeconds: 60
+

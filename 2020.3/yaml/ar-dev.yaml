@@ -1,0 +1,15 @@
+apiVersion: integration.ibm.com/v1beta1
+kind: AssetRepository
+metadata:
+  name: ar-dev
+  namespace: ar-dev
+spec:
+  license:
+    accept: true
+  replicas: 1
+  storage:
+    assetDataVolume:
+      class: ibmc-file-gold-gid
+    couchVolume:
+      class: ibmc-block-gold
+  version: 2020.3.1-0

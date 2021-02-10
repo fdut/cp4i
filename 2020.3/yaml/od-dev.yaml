@@ -1,0 +1,20 @@
+apiVersion: integration.ibm.com/v1beta2
+kind: OperationsDashboard
+metadata:
+  labels:
+    app.kubernetes.io/instance: ibm-integration-operations-dashboard
+    app.kubernetes.io/managed-by: ibm-integration-operations-dashboard
+    app.kubernetes.io/name: ibm-integration-operations-dashboard
+  name: od-dev
+  namespace: od-dev
+spec:
+  license:
+    accept: true
+  storage:
+    configDbVolume:
+      class: ibmc-file-silver-gid
+    sharedVolume:
+      class: ibmc-file-silver-gid
+    tracingVolume:
+      class: ibmc-block-gold
+  version: 2020.3.1-1
