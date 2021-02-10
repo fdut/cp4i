@@ -783,7 +783,261 @@ In PN console
 - Name : es-dev
 - Namespace : evenstream
 
+## Datapower Gateway
 
+> Note: this case is to have a seconf API Gateway (Type v5) for apic
+
+- PN is installed (with CS)
+- Datapower Gateway operator is installed 
+- A namespace to hold the dashboard (f.e. eventstream). This is optional, you might install it on the cp4i ns.
+  
+  `oc new-project apigw`
+  
+
+A namespace must exist for the use of this instance. You can use an existing namespace or create a new one prior to deployment of the instance. The namespace must allow deployments that require a Security Context Constraint of type: restricted. You can update your Security Context Constraint for an existing namespace with the following command:
+
+```
+oc adm policy add-scc-to-user <scc> system:serviceaccounts:<namespace>`
+
+The following command achieves a similar result.
+
+oc adm policy add-scc-to-group <scc> system:serviceaccounts:<namespace>
+```
+
+Example : 
+`oc adm policy add-scc-to-group anyuid system:serviceaccounts:apigw`
+
+
+An admin account must be defined. By default, an admin account is defined using the secret name admin-credentials. You can either create a secret with that name containing the credentials for the admin account, or use a different secret name by changing the passwordSecret field for the admin user in the CR.
+
+The following are values in the secret which can be used to define the user’s credentials:
+```
+- password-hashed: The hashed value (see Linux man 3 crypt for format) of the user’s password. Required if password is not defined.
+- password: The user’s password. Required if password-hashed is not defined; ignored if password-hashed is defined.
+
+- salt: The salt value used when hashing password (see man 3 crypt). Optional; ignored when password-hashed is defined. (Default: 12345678)
+- method: The name of the hashing algorithm used to hash password. Valid options: md5, sha256. Optional; ignored when password-hashed is defined. (Default: md5)
+```
+
+The following examples create Secrets with different values, but result in an user with the same credentials (and the same password hash):
+```
+oc create secret generic userName-credentials --from-literal=password=helloworld --from-literal=salt=12345678 --from-literal=method=md5
+oc create secret generic userName-credentials --from-literal=password=helloworld
+oc create secret generic userName-credentials --from-literal=password-hashed='$1$12345678$8.nskQfP4gQ8tk5xw6Wa8/'
+```
+
+More information here : https://ibm.github.io/datapower-operator-doc/apis/datapowerservice/spec/#users
+
+
+These two examples also result in Secrets with different values but identical user credentials
+
+```
+oc create secret generic userName-credentials --from-literal=password=hunter2 --from-literal=salt=NaCl --from-literal=method=sha256
+oc create secret generic userName-credentials --from-literal=password-hashed='$5$NaCl$aOrRVimQNvZ2ZLjnAyMvT3WgaUEXoWgwkgyBrhwIg04'
+
+    Notice that, when setting password-hashed, the value must be surrounded by single-quotes
+```
+
+For more information, read the Kubernetes documentation on Secrets : https://kubernetes.io/docs/concepts/configuration/secret/#using-secrets
+
+For example :
+
+```
+oc create secret generic uadmin-credentials --from-literal=password=dhc4n4gPUFUr --from-literal=salt=NaCl --from-literal=method=sha256 -n apigw
+```
+
+- A secret that hold a valid entitlement key (refer to the ibm entitlement key section) to get the images
+  you might copy the key from another ns like for example:
+  ```
+  oc get secret ibm-entitlement-key -n cp4i -o yaml | sed 's/cp4i/apigw/g' | oc create -n apigw -f -
+  ```
+
+
+
+
+- Use the authentication method and credentials set by your administrator.
+- Click Runtimes and instance. Click Create instance.
+
+- Select Gateway and click Next.
+- Select the type of instance desired and click Next.
+- Set the following values.
+
+```
+Name :	A name for your instance. Use only lowercase alphanumeric characters and "-".
+Namespace :	Select a namespace from the list. You can use the same namespace used by the Platform Navigator (typically icp4i).
+License :	You must Accept.
+User access level (under User) :	Select privileged.
+Name of user :	Enter admin.
+Password secret :	Enter the name of the secret you created previously. 
+```
+
+
+DataPowerService.yaml
+
+```
+apiVersion: datapower.ibm.com/v1beta1
+kind: DataPowerService
+metadata:
+  name: apigwv5
+  namespace: apigw
+spec:
+  datapowerMonitor:
+    lifecycleDebounceMs: 10000
+    livenessProbePort: 8080
+    peeringRecoveryCheckIntervalMs: 1000
+    resources:
+      limits:
+        cpu: 500m
+        memory: 1G
+      requests:
+        cpu: 250m
+        memory: 256M
+    xmlMgmtPort: 5550
+  imagePullSecrets:
+    - dockerhub-registry
+    - ibm-entitlement-key
+  license:
+    accept: true
+    use: production
+  livenessProbe:
+    failureThreshold: 3
+    httpGet:
+      path: /
+      port: 7879
+      scheme: HTTP
+    initialDelaySeconds: 10
+    periodSeconds: 5
+    successThreshold: 1
+    timeoutSeconds: 5
+  odTracing:
+    agent:
+      livenessProbe:
+        failureThreshold: 3
+        initialDelaySeconds: 8
+        periodSeconds: 10
+        timeoutSeconds: 2
+      readinessProbe:
+        failureThreshold: 3
+        initialDelaySeconds: 10
+        periodSeconds: 10
+        timeoutSeconds: 2
+    collector:
+      livenessProbe:
+        failureThreshold: 3
+        initialDelaySeconds: 8
+        periodSeconds: 10
+        timeoutSeconds: 2
+      readinessProbe:
+        failureThreshold: 3
+        initialDelaySeconds: 10
+        periodSeconds: 10
+        timeoutSeconds: 2
+    enabled: true
+    imageAgent: 'docker.io/ibmcom/icp4i-od-agent:latest'
+    imageCollector: 'docker.io/ibmcom/icp4i-od-collector:latest'
+    imagePullPolicy: IfNotPresent
+    odTracingDataHostname: od-store-od.od.svc
+    odTracingRegistrationHostname: icp4i-od.od.svc
+  podManagementPolicy: Parallel
+  readinessProbe:
+    failureThreshold: 3
+    httpGet:
+      path: /
+      port: 7879
+      scheme: HTTP
+    initialDelaySeconds: 10
+    periodSeconds: 5
+    successThreshold: 1
+    timeoutSeconds: 5
+  replicas: 1
+  resources:
+    limits:
+      memory: 8Gi
+    requests:
+      cpu: 4
+      memory: 4Gi
+  storage:
+    - class: ibmc-file-bronze-gid
+      deleteClaim: true
+      path: /opt/ibm/datapower/drouter/config
+      size: '10'
+      type: persistent
+    - class: ibmc-file-bronze-gid
+      deleteClaim: true
+      path: /opt/ibm/datapower/drouter/local
+      size: '10'
+      type: persistent
+  users:
+    - accessLevel: privileged
+      name: admin
+      passwordSecret: uadmin-credentials
+  version: 10.0.0
+```
+
+If using od approve de registration process (in the od dashboad)
+
+
+## Admin UI
+
+it is possible to expose the gateway ui after deployment. The ports are exposed but the webui is not enabled.
+Enable webui
+
+rsh the gateway instance pod
+
+`kubectl attach -it rf9ad2183d2-dynamic-gateway-service`
+
+login with admin/< password >
+
+`co; show web-m; web-m; admin enabled; exit; write mem; exit;`
+
+
+
+- create service and route for gwy management endpoint (port 3000)
+
+`oc create -f yaml/gwy-mgmt-service.yaml -n apigw`
+
+`oc create route passthrough --service=gwy-mgmt-service --port=3000  -n apigw`
+
+- create service and route for gwy api endpoint (port 9443)
+
+`oc create -f yaml/gwy-api-service.yaml -n apigw`
+`oc create route passthrough --service=gwy-api-service --port=9443  -n apigw`
+
+(optional)
+
+- create service and route for dp webui endpoint (port 9090)
+
+`oc create -f yaml/dp-webui-service.yaml -n apigw`
+
+`oc create route passthrough --service=dp-webui-service --port=9090  -n apigw`
+
+- configure dp
+
+```
+- default domain -> web mgmt service -> timeout x 10
+- Enable XML management interface --> 5550
+- create domain "apiconnect"
+- create self-signed cert
+  - Crypto tools
+  - download certificate
+- create a configuration sequence
+- Gateway peering
+  - gws - no TLS, memory - port number should be the same for all peer but not for each gateway peer (rate limit)
+  - ratelimit - no TLS, local ?
+  - subscription - no TLS, mem
+  - ratelimit - gwscript
+  - probe
+- Gateway peering manager
+
+- API Gateway Service
+  - local port: 3000
+  - TLS client & Server
+  
+- TLS client
+  - if verify server, you need to export certificate from apic mgmt and import in DP
+```
+
+Add gateway to the topologie
 
 # ibm entitlement key
 
@@ -791,6 +1045,7 @@ In PN console
 - login to [ MyIBM Container Software Library](https://myibm.ibm.com/products-services/containerlibrary)
 - copy the key
 - execute
+
 ```
 oc create secret docker-registry ibm-entitlement-key --docker-username=cp --docker-password=<entitlement-key> --docker-server=cp.icr.io --namespace=<yourNs>
 ```

@@ -1,0 +1,72 @@
+﻿kind: Service
+apiVersion: v1
+metadata:
+  annotations:
+    apiconnect-operator/hash: 85ddeb23e1b41ad68a9485b38c235f50f367676180994b837c53e499e5cc4bf7
+  selfLink: /api/v1/namespaces/apic/services/apicv10-gw-datapower-all
+  resourceVersion: '798194'
+  name: apicv10-gw-datapower-all
+  uid: e2d7d224-108d-40fd-83e4-d790e8ffa960
+  creationTimestamp: '2020-08-27T13:00:19Z'
+  namespace: apic
+  ownerReferences:
+    - apiVersion: gateway.apiconnect.ibm.com/v1beta1
+      kind: GatewayCluster
+      name: apicv10-gw
+      uid: fe6df4b5-3e8a-4e93-9a3b-99423b1f25fb
+      controller: true
+      blockOwnerDeletion: true
+  labels:
+    crd.apiconnect.ibm.com/instance: apicv10-gw
+    crd.apiconnect.ibm.com/kind: datapower
+spec:
+  ports:
+    - name: apic-gw-mgmt
+      protocol: TCP
+      port: 3000
+      targetPort: 3000
+    - name: rmi-port
+      protocol: TCP
+      port: 5554
+      targetPort: 5554
+    - name: webgui-port
+      protocol: TCP
+      port: 9090
+      targetPort: 9090
+    - name: api-gw-svc
+      protocol: TCP
+      port: 9443
+      targetPort: 9443
+    - name: peer-local-port
+      protocol: TCP
+      port: 16380
+      targetPort: 16380
+    - name: tms-local-port
+      protocol: TCP
+      port: 16381
+      targetPort: 16381
+    - name: adp-local-port
+      protocol: TCP
+      port: 16382
+      targetPort: 16382
+    - name: peer-monit-port
+      protocol: TCP
+      port: 26380
+      targetPort: 26380
+    - name: tms-monit-port
+      protocol: TCP
+      port: 26381
+      targetPort: 26381
+    - name: adp-monit-port
+      protocol: TCP
+      port: 26382
+      targetPort: 26382
+  selector:
+    crd.apiconnect.ibm.com/instance: apicv10-gw
+    crd.apiconnect.ibm.com/kind: datapower
+  clusterIP: None
+  type: ClusterIP
+  sessionAffinity: None
+  publishNotReadyAddresses: true
+status:
+  loadBalancer: {}

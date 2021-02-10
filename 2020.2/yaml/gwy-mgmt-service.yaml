@@ -1,0 +1,22 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: gwy-mgmt-service
+spec:
+  type: ClusterIP
+  ports:
+  - name: webgui-port
+    port: 9090
+    targetPort: 9090
+    protocol: TCP
+  - name: apic-gw-mgmt
+    port: 3000
+    protocol: TCP
+    targetPort: 3000
+  - name: api-gw-svc
+    port: 9443
+    protocol: TCP
+    targetPort: 9443
+  selector:
+    app.kubernetes.io/name: datapower
+    app.kubernetes.io/instance: apigw-apigwv5

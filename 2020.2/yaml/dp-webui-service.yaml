@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: dp-webui-service
+spec:
+  type: ClusterIP
+  ports:
+  - name: webgui-port
+    port: 9090
+    targetPort: 9090
+    protocol: TCP
+  selector:
+    app.kubernetes.io/name: datapower
+    app.kubernetes.io/instance: apigw-apigwv5
