@@ -1,6 +1,18 @@
 
+
+scriptname=`basename "$0"`
+
+if [ $# -eq 0 ]
+  then
+    echo "No arguments supplied, please add registry key for IBM Registry Entitlement as argument"
+    echo "Example: $scriptname registry_key"
+    exit 1
+else
+  REGISTRY_KEY=$1
+fi
+
+
 CURRENT_ENV=dev
-REGISTRY_KEY=eyJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJJQk0gTWFya2V0cGxhY2UiLCJpYXQiOjE1ODAyMDcwOTMsImp0aSI6ImM1NTY1MTcyNmY3OTQ5ZmE4MTE5MDZhOWRjMDYyMjkxIn0.WTHhUJPB-qfoaZ8BwaGd6aiXpsXoBFSs-FqWzomsEZQ
 
 prepare_project () {
         echo "Create project $1"
